@@ -1,51 +1,85 @@
+<!--Charlotte Schepers, JavaScript, Program 5 -->
 <!DOCTYPE html>
 <html>
   <head>
       <meta charset="UTF-8">
-      <title>Program 5</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Program5</title>
+
 	  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.min.js"></script>
+      <!-- bootstrap on github   need to use https for these links -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+      <style> .btn{ margin: 5px
+                }
+                 </style>
   </head>
 
   <body>
-      <h2>Select a major</h2>
 
-      <h3>We filter our dataset by majors</h3>
-          <div id="peopleTable"></div>
+     <div class="container">
+            <h2>Select a Major</h2>
+
+            <div style='padding: 5px;'>
+               <button type='button' class="btn btn-primary" onClick="getData('CIT')">CIT Majors</button>
+               <button type='button' class="btn btn-primary" onClick="getData('BUS')">Business Majors</button>
+
+            </div>
+            <h4>We filter our dataset by majors</h4>
+
+
+                <div id="dataTable"></div>
+
+
+     </div>   <!-- end class='container'   -->
   </body>
 
-<!-- The script element is used to define the Handlebars template -->
+
+  <!-- Handlebars template -->
 <script type="text/x-handlebars-template" id="tableTemplate">
-   <table cellspacing='12'>
+
+   <table class="table table-striped">
        <tr><th>Name</th><th>Major</th><th>Midterm</th><th>Final</th></tr>
-       {{#each rows}}
-            <tr>
-                <td>{{name}}</td><td>{{major}}</td><td>{{midterm}}</td><td>{{final}}</td>
-            </tr>
-      {{/each}}
+           {{#each rows}}
+               <tr>
+                  <td>{{name}}</td><td>{{major}}</td><td>{{midterm}}</td><td>{{final}}</td>
+               </tr>
+           {{/each}}
    </table>
 </script>
-  
+
+  <!-- application ajax code -->
 <script>
-    var request = new XMLHttpRequest();
-    var url = "cit5students.json";
-    request.open('GET', url);     // open the request
-	
-    request.onload = function() {                     // the data is back...
 
-        var data = JSON.parse(request.responseText);    // de-stringify JSON back to regular array of JavaScript objects
+	function getData(selected_major) {
+		var request = new XMLHttpRequest();
+    	request.open('GET', 'cit5students.json');     // open the request
 
-        if (request.status == 200) {
-              var templateText = document.getElementById('tableTemplate').innerHTML; // Get template text 
-              var compiledTemplateText = Handlebars.compile(templateText);    // Compile the Handlebars template
-              compiledHtml = compiledTemplateText({ rows: data })             // Evaluate the template
-			  document.getElementById('peopleTable').innerHTML = compiledHtml; 	// put html table into division
-        }
-        else {
-            document.querySelector('#peopleTable').innerHTML = "There was an error, or currency symbol not found";
-        }
-    }
+    	request.onload = function() {
+
+        	var data = JSON.parse(request.responseText);
+			major_items = data.filter(getMajor)   // filter data for selected meal
+
+			function getMajor(item) {
+            	return item.major == selected_major;
+        	}
+
+        	if (request.status == 200) {
+              	var templateText = document.getElementById('tableTemplate').innerHTML;
+             	var compiledTemplateText = Handlebars.compile(templateText);   // get and compile template code
+
+              	compiledHtml = compiledTemplateText({ rows: major_items })      // apply data to template
+              	document.getElementById('dataTable').innerHTML = compiledHtml;
+       	 	}
+        	else {
+            	document.querySelector('#dataTable').innerHTML = "There was an error, or table items not found";
+        	}
+		}
 
     request.send(null);
-  
+  }
+
 </script>
 </html>
